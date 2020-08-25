@@ -1,6 +1,8 @@
 {
   "name": "vue-dynamic-slider",
   "version": "0.1.0",
+  "description": "A light-weight slider for Vue",
+  "author": "BakoviDagi",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -9,6 +11,10 @@
     "package": "vue-cli-service build --mode package --target lib --name vue-dynamic-slider src/index.js"
   },
   "main": "./dist/vue-dynamic-slider.umd.min.js",
+  "files": [
+    "dist",
+    "src"
+  ],
   "peerDependencies": {
     "vue": "^2.6.11",
     "core-js": "^3.4.3"
@@ -25,6 +31,23 @@
     "vue-template-compiler": "^2.6.11",
     "vue": "^2.6.11",
     "core-js": "^3.4.3"
+  },
+  "bugs": {
+    "url": "https://github.com/BakoviDagi/vue-dynamic-slider/issues"
+  },
+  "homepage": "https://github.com/BakoviDagi/vue-dynamic-slider",
+  "keywords": [
+    "vue",
+    "slider",
+    "vue-slider",
+    "carousel",
+    "vue-carousel",
+    "vue-dynamic-slider"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BakoviDagi/vue-dynamic-slider.git"
   },
   "eslintConfig": {
     "root": true,
