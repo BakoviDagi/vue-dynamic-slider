@@ -4,11 +4,14 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "build:library": "npm run package",
+    "package": "vue-cli-service build --mode package --target lib --name vue-dynamic-slider src/index.js"
   },
-  "dependencies": {
-    "core-js": "^3.4.3",
-    "vue": "^2.0.0"
+  "main": "./dist/vue-dynamic-slider.umd.min.js",
+  "peerDependencies": {
+    "vue": "^2.6.11",
+    "core-js": "^3.4.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.1.0",
@@ -19,7 +22,9 @@
     "sass-loader": "^8.0.0",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.6.10"
+    "vue-template-compiler": "^2.6.11",
+    "vue": "^2.6.11",
+    "core-js": "^3.4.3"
   },
   "eslintConfig": {
     "root": true,
