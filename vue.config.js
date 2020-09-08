@@ -22,7 +22,6 @@ module.exports = {
         .end()
       
     } else {
-      config.output.libraryExport('default');
       config.externals({
         vue: {
           commonjs: 'vue',

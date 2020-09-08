@@ -56,9 +56,9 @@
         slides.unshift(...deepClone(this.$slots.default, createElement, 'prevDup'));
         slides.push(...deepClone(this.$slots.default, createElement, 'nextDup'));
       }
-      return createElement('div', {style: 'white-space: nowrap; overflow: hidden;'}, [
+      return createElement('div', {class: 'dynamic-slider'}, [
         createElement('div', {
-            class: 'SliderSlides position-relative',
+            class: 'dynamic-slider-slides',
             style: `left: ${this.currentOffset}px`,
             // Add a "capture" click listener https://vuejs.org/v2/guide/render-function.html#Event-amp-Key-Modifiers
             on: { '!click': this.cancelClicks }

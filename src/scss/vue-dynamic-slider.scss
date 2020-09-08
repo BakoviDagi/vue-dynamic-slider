@@ -1,0 +1,13 @@
+.dynamic-slider {
+  white-space: nowrap;
+  overflow: hidden;
+
+  .dynamic-slider-slide {
+    display: inline-block;
+    white-space: normal;
+  }
+
+  .dynamic-slider-slides {
+    position: relative;
+  }
+}

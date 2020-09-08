@@ -1,4 +1,5 @@
 <script>
+  import "../scss/vue-dynamic-slider.scss";
   export default {
     props: {
       slidesPerView: {

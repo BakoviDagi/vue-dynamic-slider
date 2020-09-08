@@ -2,7 +2,7 @@
   <transition :name="transition">
     <div
       v-show="active"
-      class="SliderSlide d-inline-block"
+      class="dynamic-slider-slide"
       :style="{'width': widthPercent}"
     >
       <slot/>
