@@ -1,12 +1,14 @@
 module.exports = {
   parallel: false,
   publicPath:
-    process.env.NODE_ENV === 'production' && process.env.VUE_APP_BUILD_MODE !== 'package'
-      ? '/vue-slider-component/'
+    process.env.NODE_ENV === 'demo'
+      ? ''
       : '/',
-  outputDir: 'dist',
+  outputDir: process.env.NODE_ENV === 'demo'
+    ? 'dist/demo'
+    : 'dist',
   chainWebpack: config => {
-    if (process.env.VUE_APP_BUILD_MODE !== 'package') {
+    if (process.env.VUE_APP_BUILD_MODE !== 'package' || process.env.NODE_ENV === 'demo') {
       config.resolve.alias.set('vue$', 'vue/dist/vue.common').set('~', __dirname);
       
       config.module

@@ -1,19 +1,22 @@
 {
   "name": "vue-dynamic-slider",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A light-weight slider for Vue",
   "author": "BakoviDagi",
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service serve src/demo/index.js",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "build:library": "npm run package",
-    "package": "vue-cli-service build --mode package --target lib --name vue-dynamic-slider src/index.js"
+    "package": "vue-cli-service build --mode package --target lib --name vue-dynamic-slider src/index.js",
+    "package:demo": "cross-env NODE_ENV=demo vue-cli-service build --mode package --target app --name vue-dynamic-slider-demo src/demo/index.js"
   },
   "main": "./dist/vue-dynamic-slider.umd.min.js",
   "files": [
-    "dist",
-    "src"
+    "dist/*",
+    "src/*",
+    "!/**/demo",
+    "!dist/demo.html"
   ],
   "peerDependencies": {
     "core-js": "^3.4.3",
@@ -25,6 +28,7 @@
     "@vue/cli-service": "^4.1.0",
     "babel-eslint": "^10.0.3",
     "core-js": "^3.4.3",
+    "cross-env": "^7.0.3",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
     "node-sass": "^4.13.0",
