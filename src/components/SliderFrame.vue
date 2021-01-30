@@ -1,18 +1,39 @@
 <script>
   import "../scss/vue-dynamic-slider.scss";
+  import {keepInRange} from './utils/range-util';
+  import {easeOutCubic} from './utils/scroll';
+
   export default {
     props: {
+      /**
+       * The number of slides to show at a time
+       */
       slidesPerView: {
         type: Number,
         default: 5
       },
+      /**
+       * True to enable infinite scrolling
+       */
       infiniteScroll: {
         type: Boolean,
         default: false
       },
+      /**
+       * The breakpoints to change slides per view
+       * @see breakpoint-mixin.js
+       */
       breakpoints: {
         type: Object,
         default: null
+      },
+      /**
+       * Override for the scrolling function.
+       * @see easeOutCubic
+       */
+      scrollingFunction: {
+        type: Function,
+        default: easeOutCubic
       }
     },
     data() {
@@ -20,9 +41,6 @@
         activeIndex: 0,
         totalSlides: 0,
         currentSlidesPerView: this.slidesPerView,
-
-        canScrollPrev: false,
-        canScrollNext: true
       };
     },
     provide() {
@@ -44,9 +62,7 @@
       Object.defineProperty(props, 'activeIndex', {
         enumerable: true,
         get: () => this.activeIndex,
-        set: (activeIndex) => {
-          this.activeIndex = activeIndex
-        }
+        set: this.setActiveIndex
       });
       Object.defineProperty(props, 'totalSlides', {
         enumerable: true,
@@ -55,30 +71,33 @@
           this.totalSlides = totalSlides
         }
       });
+
+      // Read-only
       Object.defineProperty(props, 'infiniteScroll', {
         enumerable: true,
-        get: () => this.infiniteScroll,
+        get: () => this.shouldInfiniteScroll,
       });
       Object.defineProperty(props, 'breakpoints', {
         enumerable: true,
         get: () => this.breakpoints,
       });
+      Object.defineProperty(props, 'scrollingFunction', {
+        enumerable: true,
+        get: () => this.scrollingFunction,
+      });
 
-      Object.defineProperty(props, 'canScrollNext', {
-        enumerable: true,
-        get: () => this.canScrollNext,
-        set: (canScrollNext) => {
-          this.canScrollNext = canScrollNext
-        }
-      });
-      Object.defineProperty(props, 'canScrollPrev', {
-        enumerable: true,
-        get: () => this.canScrollPrev,
-        set: (canScrollPrev) => {
-          this.canScrollPrev = canScrollPrev
-        }
-      });
       return {props}
+    },
+    computed: {
+      canScrollNext () {
+        return this.shouldInfiniteScroll || this.activeIndex < this.totalSlides - 1;
+      },
+      canScrollPrev () {
+        return this.shouldInfiniteScroll || this.activeIndex > 0;
+      },
+      shouldInfiniteScroll () {
+        return this.infiniteScroll && this.totalSlides > this.currentSlidesPerView;
+      }
     },
     watch: {
       activeIndex(activeIndex) {
@@ -90,21 +109,40 @@
         this.activeIndex = index;
       },
       next() {
-        this.activeIndex++;
+        if (this.canScrollNext) {
+          this.activeIndex++;
+        }
       },
       prev() {
-        this.activeIndex--;
+        if (this.canScrollPrev) {
+          this.activeIndex--;
+        }
       },
+      setActiveIndex (activeIndex) {
+        if (this.shouldInfiniteScroll) {
+          // TODO first scroll to slide outside of range, then update offset to absolute
+          this.activeIndex = activeIndex % this.totalSlides;
+        } else {
+          this.activeIndex = keepInRange(activeIndex, 0, this.totalSlides - 1);
+        }
+      }
     },
     render() {
       return this.$scopedSlots.default({
         // Data
+        /** The current slide */
         activeIndex: this.activeIndex,
+        /** Whether or not there is a next slide to scroll to */
         canScrollNext: this.canScrollNext,
+        /** Whether or not there is a previous slide to scroll to */
         canScrollPrev: this.canScrollPrev,
+
         // Methods
+        /** Function to scroll to the given slide */
         scrollToSlide: this.goToIndex,
+        /** Function to scroll to the next slide */
         next: this.next,
+        /** Function to scroll to the previous slide */
         prev: this.prev
       });
     },

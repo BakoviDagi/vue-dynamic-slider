@@ -21,15 +21,14 @@ export default {
 
     scrollToSlide(slideIndex) {
       const vm = this;
-      // TODO below two statements don't really belong here
-      // Just to make sure that that active slide is correct
-      vm.props.activeIndex = slideIndex;
-      // Move the slides back to the non-duplicated
-      vm.updateOffsetToBeAbsolute();
 
       // Calculate the position, and then shift it over to the non-duplicated slides
       const slideOffset = vm.getSlideOffset(slideIndex);
-    
+
+      if (slideOffset === vm.currentOffset) {
+        return;
+      }
+
       requestAnimationFrame(function (timestamp) {
         vm.scrolling = true;
         vm.scrollStartTime = timestamp;
@@ -43,7 +42,7 @@ export default {
         return;
       }
   
-      vm.currentOffset = easeOutCubic(currentTime - vm.scrollStartTime, from, to, duration);
+      vm.currentOffset = this.props.scrollingFunction(currentTime - vm.scrollStartTime, from, to, duration);
     
       requestAnimationFrame((timestamp) => {
         if (currentTime < vm.scrollStartTime + duration) {
@@ -55,10 +54,3 @@ export default {
     }
   }
 };
-
-function easeOutCubic (currentTime, initialValue, finalValue, duration) {
-  let changeInValue = finalValue - initialValue;
-  currentTime /= duration;
-  currentTime--;
-  return changeInValue * (currentTime * currentTime * currentTime + 1) + initialValue;
-}

@@ -1,22 +1,25 @@
 <template>
-  <transition :name="transition">
-    <div
-      v-show="active"
-      class="dynamic-slider-slide"
-      :style="{'width': widthPercent}"
-    >
-      <slot/>
-    </div>
-  </transition>
+  <div
+    v-show="active"
+    :class="slideClass"
+    :style="{'width': widthPercent}"
+  >
+    <slot/>
+  </div>
 </template>
 
 <script>
   export default {
     name: 'SliderSlide',
+    props: {
+      slideClass: {
+        type: [String, Object, Array],
+        default: 'dynamic-slider-slide'
+      }
+    },
     data() {
       return {
-        active: true,
-        transition: '',
+        active: true
       };
     },
     inject: [

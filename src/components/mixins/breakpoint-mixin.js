@@ -44,6 +44,9 @@ export default {
   },
   methods: {
     getBreakpointValue (breakpointMap, defaultValue) {
+      if (!breakpointMap) {
+        return defaultValue;
+      }
       let computedBreakpoints = {};
       // If the breakpoints are 'xl', 'md' etc instead of numbers, get their corresponding numbers
       Object.keys(breakpointMap).forEach(breakpoint => {

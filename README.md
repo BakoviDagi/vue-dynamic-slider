@@ -7,6 +7,9 @@ Note: This is in beta and is subject to change.
   - Yarn: `yarn add vue-dynamic-slider`
   - or NPM: `npm install vue-dynamic-slider`
 
+### Demos:
+Please visit the demo site: https://bakovidagi.github.io/vue-dynamic-slider/demo/
+
 ### Usage:
 
 ##### Template

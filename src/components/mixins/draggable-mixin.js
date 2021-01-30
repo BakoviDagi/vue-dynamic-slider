@@ -1,4 +1,7 @@
+import {keepInRange} from '../utils/range-util';
+
 const VELOCITY_THRESHOLD = .1;
+const DRAG_TOLERANCE = 2;
 
 export default {
   data () {
@@ -10,6 +13,22 @@ export default {
       scrolling: false,
       previousTime: Date.now()
     };
+  },
+  computed: {
+    closestSlideIndex () {
+      let roundType = 'round';
+      if (this.velocity >= VELOCITY_THRESHOLD) {
+        roundType = 'floor';
+      } else if (this.velocity <= -VELOCITY_THRESHOLD) {
+        roundType = 'ceil';
+      }
+      // Move the slides back to the non-duplicated
+      let index = Math[roundType](this.scrollPercentage * this.props.totalSlides);
+      if (!this.props.infiniteScroll) {
+        index = keepInRange(index, 0, this.props.totalSlides - 1);
+      }
+      return index;
+    }
   },
   mounted () {
     this.$el.addEventListener('touchstart', this.dragStart);
@@ -46,12 +65,7 @@ export default {
     },
   
     dragAction(e) {
-      let currentPosition;
-      if (e.type === 'touchmove') {
-        currentPosition = e.touches[0].clientX;
-      } else {
-        currentPosition = e.clientX;
-      }
+      const currentPosition = this.currentPosition(e);
     
       // Calculate velocity so we can go to the next slide if the user slides fast enough
       const currentTime = Date.now();
@@ -61,7 +75,7 @@ export default {
       this.currentOffset -= this.previousClientX - currentPosition;
       this.previousClientX = currentPosition;
     
-      if (this.infiniteScroll) {
+      if (this.props.infiniteScroll) {
         if (this.currentOffset >= 0) {
           this.currentOffset -= this.totalWidth;
         } else if (this.currentOffset <= this.duplicateRightStart) {
@@ -70,11 +84,14 @@ export default {
       }
     },
   
-    dragEnd() {
+    dragEnd(e) {
       document.removeEventListener('mousemove', this.dragAction);
       document.removeEventListener('mouseup', this.dragEnd);
-    
-      this.scrollToSlide(getClosestSlideIndex(this.totalSlides, this.scrollPercentage, this.velocity));
+      if (this.didDrag(this.currentPosition(e))) {
+        this.props.activeIndex = this.closestSlideIndex;
+        this.scrollToSlide(this.closestSlideIndex);
+      }
+      this.velocity = 0;
     },
   
     /**
@@ -82,30 +99,19 @@ export default {
      * @param e
      */
     cancelClicks(e) {
-      const currentClientX = e.clientX || e.touches[0].clientX;
       // If moved more than 2px, cancel click events on children
-      if (Math.abs(currentClientX - this.startClientX) > 2) {
+      if (this.didDrag(this.currentPosition(e))) {
         e.stopPropagation();
       }
+    },
+
+    didDrag (currentClientX) {
+      return Math.abs(currentClientX - this.startClientX) > DRAG_TOLERANCE;
+    },
+    
+    currentPosition (e) {
+      return e.type === 'touchmove'
+        ? e.touches[0].clientX : e.clientX;
     }
   }
 };
-
-/**
- * Get the closest slide index based on the scroll percentage. If scroll velocity is given, take it into account for the rounding type
- *
- * @param {number} totalNumSlides The total number of slides
- * @param {number} scrollPercent the scroll percentage
- * @param {number} velocity the speed of the scrolling; used to modify the rounding type (floor vs ceil based on direction)
- * @returns {number} the index of the closest slide
- */
-function getClosestSlideIndex (totalNumSlides, scrollPercent, velocity=0) {
-  let roundType = 'round';
-  if (velocity >= VELOCITY_THRESHOLD) {
-    roundType = 'floor';
-  } else if (velocity <= -VELOCITY_THRESHOLD) {
-    roundType = 'ceil';
-  }
-  // Move the slides back to the non-duplicated
-  return Math[roundType](scrollPercent * totalNumSlides);
-}
