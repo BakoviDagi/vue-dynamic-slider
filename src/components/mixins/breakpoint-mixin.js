@@ -29,21 +29,26 @@ export default {
     );
   
     if (this.props.breakpoints) {
-      this.props.currentSlidesPerView = this.getBreakpointValue(this.props.breakpoints, this.props.slidesPerView);
+      this.props.currentSlidesPerView = this.getBreakpointValue(this.props.breakpoints, this.props.slidesPerView, 'slidesPerView');
+      this.props.currentScrollIncrement = this.getBreakpointValue(this.props.breakpoints, this.props.scrollIncrement, 'scrollIncrement');
     }
   },
   watch: {
     windowWidth () {
       if (this.props.breakpoints) {
-        this.props.currentSlidesPerView = this.getBreakpointValue(this.props.breakpoints, this.props.slidesPerView);
+        this.props.currentSlidesPerView = this.getBreakpointValue(this.props.breakpoints, this.props.slidesPerView, 'slidesPerView');
+        this.props.currentScrollIncrement = this.getBreakpointValue(this.props.breakpoints, this.props.scrollIncrement, 'scrollIncrement');
       }
     },
     'props.slidesPerView': function (slidesPerView) {
-      this.props.currentSlidesPerView = this.getBreakpointValue(this.props.breakpoints, slidesPerView);
+      this.props.currentSlidesPerView = this.getBreakpointValue(this.props.breakpoints, slidesPerView, 'slidesPerView');
+    },
+    'props.scrollIncrement': function (scrollIncrement) {
+      this.props.currentSlidesPerView = this.getBreakpointValue(this.props.breakpoints, scrollIncrement, 'scrollIncrement');
     }
   },
   methods: {
-    getBreakpointValue (breakpointMap, defaultValue) {
+    getBreakpointValue (breakpointMap, defaultValue, fieldName) {
       if (!breakpointMap) {
         return defaultValue;
       }
@@ -60,7 +65,7 @@ export default {
     
       for(let breakpoint of Object.keys(computedBreakpoints).sort(breakpointComparator)) {
         if (this.windowWidth <= breakpoint) {
-          return computedBreakpoints[breakpoint];
+          return computedBreakpoints[breakpoint][fieldName] || defaultValue;
         }
       }
       return defaultValue;

@@ -43,7 +43,7 @@ export default {
       }
   
       vm.currentOffset = this.props.scrollingFunction(currentTime - vm.scrollStartTime, from, to, duration);
-    
+
       requestAnimationFrame((timestamp) => {
         if (currentTime < vm.scrollStartTime + duration) {
           vm.scroll(from, to, timestamp, duration);

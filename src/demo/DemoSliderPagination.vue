@@ -1,7 +1,14 @@
 <template>
   <slider-frame
     :slides-per-view="5"
-    :breakpoints="{sm: 1, md: 2, lg: 3, xl: 4}"
+    :scroll-increment="3"
+    :infinite-scroll="true"
+    :breakpoints="{
+      sm: { slidesPerView: 1 },
+      md: { slidesPerView: 2 },
+      lg: { slidesPerView: 3 },
+      xl: { slidesPerView: 4 }
+    }"
   >
     <div class="slider d-inline-flex" slot-scope="{ next, prev, scrollToSlide, activeIndex, canScrollNext, canScrollPrev }">
       <button

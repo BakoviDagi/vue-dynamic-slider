@@ -2,6 +2,7 @@
   <div>
     <slider-frame
       :slides-per-view="slidesPerView"
+      :scroll-increment="slidesPerView"
       :infinite-scroll="true"
     >
       <div class="slider" slot-scope="{ activeIndex }">

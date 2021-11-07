@@ -1,7 +1,5 @@
 <script>
   import {deepClone} from './utils/vue-util';
-  import {throttle} from './utils/throttle';
-  import {listenToImagesLoad} from './utils/mutations';
   import ScrollableMixin from './mixins/scrollable-mixin';
   import DraggableMixin from './mixins/draggable-mixin';
   import BreakpointMixin from './mixins/breakpoint-mixin';
@@ -9,13 +7,19 @@
   export default {
     name: 'SliderSlides',
     mixins: [ScrollableMixin, DraggableMixin, BreakpointMixin],
+    props: {
+      classes: {
+        type: [Array, Object, String],
+        default: ''
+      }
+    },
     data() {
       return {
         elementWidth: -1,
         currentOffset: 0,
         scrollPercentage: 0,
 
-        observer: null
+        resizeObserver: null
       }
     },
     inject: [
@@ -51,9 +55,9 @@
         slides.unshift(...deepClone(this.$slots.default, createElement, 'prevDup'));
         slides.push(...deepClone(this.$slots.default, createElement, 'nextDup'));
       }
-      return createElement('div', {class: 'dynamic-slider'}, [
+      return createElement('div', { class: 'dynamic-slider' /* TODO padding breaks this */ }, [
         createElement('div', {
-            class: 'dynamic-slider-slides',
+            class: ['dynamic-slider-slides', this.classes],
             style: `left: ${this.currentOffset}px`,
             // Add a "capture" click listener https://vuejs.org/v2/guide/render-function.html#Event-amp-Key-Modifiers
             on: { '!click': this.cancelClicks }
@@ -62,15 +66,8 @@
       ]);
     },
     mounted() {
-      window.addEventListener('scroll', this.updateWidth);
-      window.addEventListener('resize', this.updateWidth);
-      window.addEventListener('resize', this.updateOffsetToBeAbsolute);
-
-      // Add a new mutation observer to update the width on DOM changes
-      // TODO look into the efficiency of this
-      this.observer = new MutationObserver(throttle(this.mutationObserverCallback, 20));
-      this.observer.observe(this.$el, {attributes: true, childList: true, subtree: true});
-      this.updateWidth();
+      this.resizeObserver = new ResizeObserver(this.updateWidth);
+      this.resizeObserver.observe(this.$el);
     },
     watch: {
       currentOffset(currentOffset) {
@@ -87,17 +84,24 @@
       },
       'props.activeIndex': function (activeIndex) {
         // Move the slides back to the non-duplicated
-        this.updateOffsetToBeAbsolute();
+        // let relativeIndex = activeIndex % this.totalSlides;
+        // if (relativeIndex !== 0 && relativeIndex !== this.totalSlides - 1) {
+        // }
         this.scrollToSlide(activeIndex);
+        this.updateOffsetToBeAbsolute();
+      },
+      elementWidth () {
+        this.jumpToSlide(this.props.activeIndex);
       }
     },
     beforeDestroy() {
-      this.observer.disconnect();
+      this.resizeObserver.disconnect();
     },
     methods: {
 
       updateWidth() {
         this.elementWidth = this.$el.offsetWidth;
+        this.updateOffsetToBeAbsolute();
       },
 
       updateOffsetToBeAbsolute () {
@@ -106,17 +110,6 @@
 
       getSlideOffset (slideIndex) {
         return -slideIndex * this.slideWidth + this.slideOffsetModifier;
-      },
-
-      mutationObserverCallback(mutationsList) {
-        this.$nextTick(() => {
-          this.updateWidth();
-        });
-        listenToImagesLoad(mutationsList, () => {
-          // TODO update these to be automated (shouldn't have to call keep position?)
-          this.updateWidth();
-          this.updateOffsetToBeAbsolute();
-        });
       }
     }
   };

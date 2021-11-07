@@ -8,6 +8,7 @@ export default {
     return {
       currentOffset: 0,
       previousClientX: 0,
+      previousClientY: 0,
       startClientX: 0,
       velocity: 0,
       scrolling: false,
@@ -56,6 +57,7 @@ export default {
       e.preventDefault();
       if (e.type === 'touchstart') {
         this.previousClientX = e.touches[0].clientX;
+        this.previousClientY = e.touches[0].clientY;
       } else {
         this.previousClientX = e.clientX;
         document.addEventListener('mousemove', this.dragAction);
@@ -66,6 +68,8 @@ export default {
   
     dragAction(e) {
       const currentPosition = this.currentPosition(e);
+      
+      this.handleVerticalScroll(e);
     
       // Calculate velocity so we can go to the next slide if the user slides fast enough
       const currentTime = Date.now();
@@ -88,10 +92,26 @@ export default {
       document.removeEventListener('mousemove', this.dragAction);
       document.removeEventListener('mouseup', this.dragEnd);
       if (this.didDrag(this.currentPosition(e))) {
-        this.props.activeIndex = this.closestSlideIndex;
-        this.scrollToSlide(this.closestSlideIndex);
+        let prevModifier = 0;
+        // Fix issue caused by absolute slides with currentScrollIncrement > 1, where if on the first slide going backwards
+        // it will pop back to the first slide unless you go to the start of the previous group
+        // TODO I don't like having to do this. Should it be part of closestSlideIndex instead?
+        if (this.props.activeIndex === 0
+          && this.closestSlideIndex > this.props.totalSlides - this.props.currentScrollIncrement) {
+          prevModifier = this.props.totalSlides;
+        }
+        this.props.activeIndex = this.closestSlideIndex - prevModifier;
       }
       this.velocity = 0;
+      this.scrollToSlide(this.props.activeIndex);
+    },
+
+    handleVerticalScroll (e) {
+      if (e.type === 'touchmove') {
+        const clientY = e.touches[0].clientY;
+        window.scrollBy(0, this.previousClientY - clientY);
+        this.previousClientY = clientY;
+      }
     },
   
     /**
@@ -110,8 +130,14 @@ export default {
     },
     
     currentPosition (e) {
-      return e.type === 'touchmove'
-        ? e.touches[0].clientX : e.clientX;
+      switch (e.type) {
+        case 'touchmove':
+          return e.touches[0].clientX;
+        case 'touchend':
+          return e.changedTouches[0].clientX;
+        default:
+          return e.clientX;
+      }
     }
   }
 };

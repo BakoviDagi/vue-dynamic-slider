@@ -13,6 +13,13 @@
         default: 5
       },
       /**
+       * The number of slides to scroll by at a time
+       */
+      scrollIncrement: {
+        type: Number,
+        default: 1
+      },
+      /**
        * True to enable infinite scrolling
        */
       infiniteScroll: {
@@ -41,6 +48,7 @@
         activeIndex: 0,
         totalSlides: 0,
         currentSlidesPerView: this.slidesPerView,
+        currentScrollIncrement: this.scrollIncrement
       };
     },
     provide() {
@@ -57,6 +65,20 @@
         get: () => this.currentSlidesPerView,
         set: (currentSlidesPerView) => {
           this.currentSlidesPerView = currentSlidesPerView
+        }
+      });
+      Object.defineProperty(props, 'scrollIncrement', {
+        enumerable: true,
+        get: () => this.scrollIncrement,
+        set: (scrollIncrement) => {
+          this.scrollIncrement = scrollIncrement
+        }
+      });
+      Object.defineProperty(props, 'currentScrollIncrement', {
+        enumerable: true,
+        get: () => this.currentScrollIncrement,
+        set: (currentScrollIncrement) => {
+          this.currentScrollIncrement = currentScrollIncrement
         }
       });
       Object.defineProperty(props, 'activeIndex', {
@@ -90,13 +112,35 @@
     },
     computed: {
       canScrollNext () {
+        // TODO
         return this.shouldInfiniteScroll || this.activeIndex < this.totalSlides - 1;
       },
       canScrollPrev () {
+        // TODO
         return this.shouldInfiniteScroll || this.activeIndex > 0;
       },
       shouldInfiniteScroll () {
         return this.infiniteScroll && this.totalSlides > this.currentSlidesPerView;
+      },
+      singleScroll () {
+        return this.currentScrollIncrement === 1;
+      },
+      slidesInView () {
+        const slidesInView = [];
+        for (let i = this.activeIndex; i < this.activeIndex + this.currentSlidesPerView; i++) {
+          if (this.infiniteScroll) {
+            slidesInView.push(i >= this.totalSlides ? i - this.totalSlides : i);
+          } else if (i < this.totalSlides) {
+            slidesInView.push(i);
+          }
+        }
+        return slidesInView;
+      },
+      currentPage () {
+        return Math.floor(this.activeIndex / this.totalSlides * this.numPages);
+      },
+      numPages () {
+        return Math.ceil(this.totalSlides / this.currentScrollIncrement);
       }
     },
     watch: {
@@ -106,25 +150,49 @@
     },
     methods: {
       goToIndex(index) {
-        this.activeIndex = index;
+        this.requestScrollToSlide(this.getNearestAllowedIndex(index));
       },
       next() {
-        if (this.canScrollNext) {
-          this.activeIndex++;
-        }
+        this.requestScrollToSlide(this.getNearestAllowedIndex(this.activeIndex + 1, 'next'));
       },
       prev() {
-        if (this.canScrollPrev) {
-          this.activeIndex--;
-        }
+        this.requestScrollToSlide(this.getNearestAllowedIndex(this.activeIndex - 1, 'prev'));
       },
       setActiveIndex (activeIndex) {
+        this.requestScrollToSlide(this.getNearestAllowedIndex(activeIndex));
+      },
+      requestScrollToSlide (index) {
         if (this.shouldInfiniteScroll) {
           // TODO first scroll to slide outside of range, then update offset to absolute
-          this.activeIndex = activeIndex % this.totalSlides;
+          this.activeIndex = index/* % this.totalSlides*/;
         } else {
-          this.activeIndex = keepInRange(activeIndex, 0, this.totalSlides - 1);
+          this.activeIndex = keepInRange(index, 0, this.totalSlides - 1);
         }
+      },
+      /**
+       * Takes the scrollIncrement into account and rounds to the nearest allowed slide
+       */
+      getNearestAllowedIndex (index, dir = 'auto') {
+        if (this.singleScroll) {
+          return index;
+        }
+        if (dir === 'auto') {
+          dir = index > this.activeIndex ? 'next' : 'prev';
+        }
+        const round = dir === 'next' ? 'ceil' : 'floor';
+        // Round to multiple of currentScrollIncrement
+        const allowedIndex = Math[round](index / this.currentScrollIncrement ) * this.currentScrollIncrement;
+        if (!this.shouldInfiniteScroll) {
+          return allowedIndex;
+        }
+        if (allowedIndex < 0) {
+          // If it's negative, run this again with the max slide num, rounding down
+          return this.getNearestAllowedIndex(this.totalSlides - 1, 'prev');
+        }
+        if (allowedIndex > this.totalSlides - 1) {
+          return 0;
+        }
+        return allowedIndex;
       }
     },
     render() {
@@ -136,6 +204,13 @@
         canScrollNext: this.canScrollNext,
         /** Whether or not there is a previous slide to scroll to */
         canScrollPrev: this.canScrollPrev,
+        /** The array of all slide indices that are visible */
+        slidesInView: this.slidesInView,
+        /** Object that contains pagination information */
+        pagination: {
+          numPages: this.numPages,
+          currentPage: this.currentPage
+        },
 
         // Methods
         /** Function to scroll to the given slide */
