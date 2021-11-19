@@ -1,5 +1,8 @@
 # vue-dynamic-slider
 
+##### 0.3.2
+  - `ISSUE#4`: Add `scrollToPage` slot prop method that scrolls to the current page
+
 ##### 0.3.1
   - Fix the publish
 

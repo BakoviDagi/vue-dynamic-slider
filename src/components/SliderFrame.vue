@@ -152,6 +152,9 @@
       goToIndex(index) {
         this.requestScrollToSlide(this.getNearestAllowedIndex(index));
       },
+      goToPage (index) {
+        this.requestScrollToSlide(this.getNearestAllowedIndex(this.currentScrollIncrement * index));
+      },
       next() {
         this.requestScrollToSlide(this.getNearestAllowedIndex(this.activeIndex + 1, 'next'));
       },
@@ -215,6 +218,8 @@
         // Methods
         /** Function to scroll to the given slide */
         scrollToSlide: this.goToIndex,
+        /** Function to scroll to the given page */
+        scrollToPage: this.goToPage,
         /** Function to scroll to the next slide */
         next: this.next,
         /** Function to scroll to the previous slide */

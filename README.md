@@ -68,6 +68,7 @@ Properties:
 
 Methods:
 - `scrollToSlide`: A function that takes a zero-based slide number and scrolls to either that or the closest one based on page
+- `scrollToPage`: A function that takes a zero-based page number and scrolls to the first slide in that page
 - `next`: Scroll to the next slide or page
 - `prev`: Scroll to the previous slide or page
 
