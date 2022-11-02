@@ -1,5 +1,8 @@
 # vue-dynamic-slider
 
+##### 0.4.0
+  - `ISSUE#5`: Fix scrolling behaviour to be smooth when moving at the beginning and end
+
 ##### 0.3.2
   - `ISSUE#4`: Add `scrollToPage` slot prop method that scrolls to the current page
 

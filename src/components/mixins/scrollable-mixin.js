@@ -1,4 +1,3 @@
-
 /**
  * A mixin to handle scrolling login in a Vue component.
  * Expects: a 'props.activeIndex', and 'getSlideOffset' method
@@ -8,47 +7,61 @@
 export default {
   data () {
     return {
-      scrolling: false,
       currentOffset: 0,
-      scrollStartTime: 0
+      scrollStartTime: 0,
+      animationId: -1,
+      promiseResolve: null
     }
   },
   methods: {
-    jumpToSlide (slideIndex) {
+    async jumpToSlide (slideIndex) {
       this.props.activeIndex = slideIndex;
       this.currentOffset = this.getSlideOffset(slideIndex);
+      await this.$nextTick();
     },
-
-    scrollToSlide(slideIndex) {
-      const vm = this;
-
+    
+    async scrollToSlide(slideIndex) {
+      // Cancel and resolve previous scrolling attempts
+      cancelAnimationFrame(this.animationId);
+      this.promiseResolve && this.promiseResolve();
+      
       // Calculate the position, and then shift it over to the non-duplicated slides
-      const slideOffset = vm.getSlideOffset(slideIndex);
-
-      if (slideOffset === vm.currentOffset) {
+      const slideOffset = this.getSlideOffset(slideIndex);
+      
+      if (slideOffset === this.currentOffset) {
         return;
       }
-
-      requestAnimationFrame(function (timestamp) {
-        vm.scrolling = true;
-        vm.scrollStartTime = timestamp;
-        vm.scroll(vm.currentOffset, slideOffset, vm.scrollStartTime, 500);
-      });
+      // Always take the shortest path. Move the current offset to be in the middle if necessary
+      if (Math.abs(this.currentOffset - slideOffset) > this.totalWidth / 2) {
+        if (this.currentOffset <= slideOffset) {
+          this.currentOffset = this.currentOffset + this.totalWidth;
+        } else {
+          this.currentOffset = this.currentOffset - this.totalWidth;
+        }
+      }
+      
+      try {
+        await new Promise(resolve => {
+          this.promiseResolve = resolve;
+          this.scrollStartTime = performance.now();
+          this.scroll(this.currentOffset, slideOffset, this.scrollStartTime, 500, resolve);
+        });
+      } catch (ignore) {
+        // ignore
+      }
     },
-  
-    scroll(from, to, currentTime, duration) {
+    
+    scroll(from, to, currentTime, duration, resolve) {
       const vm = this;
-      if (!vm.scrolling) {
-        return;
-      }
-  
       vm.currentOffset = this.props.scrollingFunction(currentTime - vm.scrollStartTime, from, to, duration);
-
-      requestAnimationFrame((timestamp) => {
+      
+      this.animationId = requestAnimationFrame((timestamp) => {
         if (currentTime < vm.scrollStartTime + duration) {
-          vm.scroll(from, to, timestamp, duration);
+          vm.scroll(from, to, timestamp, duration, resolve);
         } else {
           vm.currentOffset = to;
+          vm.updateOffsetToBeAbsolute();
+          resolve();
         }
       });
     }

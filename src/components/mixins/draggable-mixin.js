@@ -11,11 +11,26 @@ export default {
       previousClientY: 0,
       startClientX: 0,
       velocity: 0,
-      scrolling: false,
       previousTime: Date.now()
     };
   },
-  computed: {
+  mounted () {
+    this.$el.addEventListener('touchstart', this.dragStart, { passive: false });
+    this.$el.addEventListener('touchend', this.dragEnd, { passive: false });
+    this.$el.addEventListener('touchmove', this.dragAction, { passive: false });
+    this.$el.addEventListener('mousedown', this.dragStart, { passive: false });
+  },
+  beforeDestroy () {
+    this.$el.removeEventListener('touchstart', this.dragStart);
+    this.$el.removeEventListener('touchend', this.dragEnd);
+    this.$el.removeEventListener('touchmove', this.dragAction);
+    this.$el.removeEventListener('mousedown', this.dragStart);
+    
+    // In case the component is destroyed before dragEnd
+    document.removeEventListener('mousemove', this.dragAction);
+    document.removeEventListener('mouseup', this.dragEnd);
+  },
+  methods: {
     closestSlideIndex () {
       let roundType = 'round';
       if (this.velocity >= VELOCITY_THRESHOLD) {
@@ -29,56 +44,38 @@ export default {
         index = keepInRange(index, 0, this.props.totalSlides - 1);
       }
       return index;
-    }
-  },
-  mounted () {
-    this.$el.addEventListener('touchstart', this.dragStart);
-    this.$el.addEventListener('touchend', this.dragEnd);
-    this.$el.addEventListener('touchmove', this.dragAction);
-    this.$el.addEventListener('mousedown', this.dragStart);
-  },
-  beforeDestroy () {
-    this.$el.removeEventListener('touchstart', this.dragStart);
-    this.$el.removeEventListener('touchend', this.dragEnd);
-    this.$el.removeEventListener('touchmove', this.dragAction);
-    this.$el.removeEventListener('mousedown', this.dragStart);
-
-    // In case the component is destroyed before dragEnd
-    document.removeEventListener('mousemove', this.dragAction);
-    document.removeEventListener('mouseup', this.dragEnd);
-  },
-  methods: {
-  
+    },
+    
     // https://www.cssscript.com/draggable-touch-slider-carousel/
     dragStart(e) {
       // Cancel any previous scrolling
-      this.scrolling = false;
-    
+      cancelAnimationFrame(this.animationId || -1);
+      
       e.preventDefault();
       if (e.type === 'touchstart') {
         this.previousClientX = e.touches[0].clientX;
         this.previousClientY = e.touches[0].clientY;
       } else {
         this.previousClientX = e.clientX;
-        document.addEventListener('mousemove', this.dragAction);
-        document.addEventListener('mouseup', this.dragEnd);
+        document.addEventListener('mousemove', this.dragAction, { passive: false });
+        document.addEventListener('mouseup', this.dragEnd, { passive: false });
       }
       this.startClientX = this.previousClientX;
     },
-  
+    
     dragAction(e) {
       const currentPosition = this.currentPosition(e);
       
       this.handleVerticalScroll(e);
-    
+      
       // Calculate velocity so we can go to the next slide if the user slides fast enough
       const currentTime = Date.now();
       this.velocity = (currentPosition - this.previousClientX) / (currentTime - this.previousTime);
       this.previousTime = currentTime;
-    
+      
       this.currentOffset -= this.previousClientX - currentPosition;
       this.previousClientX = currentPosition;
-    
+      
       if (this.props.infiniteScroll) {
         if (this.currentOffset >= 0) {
           this.currentOffset -= this.totalWidth;
@@ -87,25 +84,24 @@ export default {
         }
       }
     },
-  
+    
     dragEnd(e) {
       document.removeEventListener('mousemove', this.dragAction);
       document.removeEventListener('mouseup', this.dragEnd);
+      let activeIndex = this.props.activeIndex;
       if (this.didDrag(this.currentPosition(e))) {
-        let prevModifier = 0;
-        // Fix issue caused by absolute slides with currentScrollIncrement > 1, where if on the first slide going backwards
-        // it will pop back to the first slide unless you go to the start of the previous group
-        // TODO I don't like having to do this. Should it be part of closestSlideIndex instead?
-        if (this.props.activeIndex === 0
-          && this.closestSlideIndex > this.props.totalSlides - this.props.currentScrollIncrement) {
-          prevModifier = this.props.totalSlides;
-        }
-        this.props.activeIndex = this.closestSlideIndex - prevModifier;
+        activeIndex = this.closestSlideIndex();
       }
       this.velocity = 0;
-      this.scrollToSlide(this.props.activeIndex);
+      
+      // If active index is going to stay the same, scroll back to start
+      if (!this.props.shouldInfiniteScroll
+        && (activeIndex > this.props.lastAllowedSlide || activeIndex === this.props.activeIndex)) {
+        this.scrollToSlide(this.props.lastAllowedSlide);
+      }
+      this.props.activeIndex = activeIndex;
     },
-
+    
     handleVerticalScroll (e) {
       if (e.type === 'touchmove') {
         const clientY = e.touches[0].clientY;
@@ -113,7 +109,7 @@ export default {
         this.previousClientY = clientY;
       }
     },
-  
+    
     /**
      * If the user dragged, they likely don't want to click a link, so cancel any click listeners on children
      * @param e
@@ -124,7 +120,7 @@ export default {
         e.stopPropagation();
       }
     },
-
+    
     didDrag (currentClientX) {
       return Math.abs(currentClientX - this.startClientX) > DRAG_TOLERANCE;
     },
