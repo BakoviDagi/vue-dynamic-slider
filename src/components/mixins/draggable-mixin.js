@@ -35,8 +35,10 @@ export default {
       let roundType = 'round';
       if (this.velocity >= VELOCITY_THRESHOLD) {
         roundType = 'floor';
+        this.props.scrollDir = 'prev';
       } else if (this.velocity <= -VELOCITY_THRESHOLD) {
         roundType = 'ceil';
+        this.props.scrollDir = 'next';
       }
       // Move the slides back to the non-duplicated
       let index = Math[roundType](this.scrollPercentage * this.props.totalSlides);
@@ -51,11 +53,11 @@ export default {
       // Cancel any previous scrolling
       cancelAnimationFrame(this.animationId || -1);
       
-      e.preventDefault();
       if (e.type === 'touchstart') {
         this.previousClientX = e.touches[0].clientX;
         this.previousClientY = e.touches[0].clientY;
       } else {
+        e.preventDefault();
         this.previousClientX = e.clientX;
         document.addEventListener('mousemove', this.dragAction, { passive: false });
         document.addEventListener('mouseup', this.dragEnd, { passive: false });
@@ -65,8 +67,6 @@ export default {
     
     dragAction(e) {
       const currentPosition = this.currentPosition(e);
-      
-      this.handleVerticalScroll(e);
       
       // Calculate velocity so we can go to the next slide if the user slides fast enough
       const currentTime = Date.now();
@@ -85,29 +85,26 @@ export default {
       }
     },
     
-    dragEnd(e) {
+    async dragEnd(e) {
       document.removeEventListener('mousemove', this.dragAction);
       document.removeEventListener('mouseup', this.dragEnd);
-      let activeIndex = this.props.activeIndex;
+      let originalIndex, newIndex = originalIndex = this.props.activeIndex;
       if (this.didDrag(this.currentPosition(e))) {
-        activeIndex = this.closestSlideIndex();
+        e.preventDefault();
+        e.stopPropagation();
+        newIndex = this.closestSlideIndex();
       }
       this.velocity = 0;
       
-      // If active index is going to stay the same, scroll back to start
-      if (!this.props.shouldInfiniteScroll
-        && (activeIndex > this.props.lastAllowedSlide || activeIndex === this.props.activeIndex)) {
-        this.scrollToSlide(this.props.lastAllowedSlide);
+      this.props.activeIndex = newIndex;
+      await this.$nextTick();
+      // If active index is unchanged, scroll back to start
+      if (this.props.activeIndex === originalIndex) {
+        // Reverse the direction so it's smoother and scroll to it
+        this.props.scrollDir = this.props.scrollDir === 'next' ? 'prev' : 'next';
+        await this.scrollToSlide(this.props.activeIndex);
       }
-      this.props.activeIndex = activeIndex;
-    },
-    
-    handleVerticalScroll (e) {
-      if (e.type === 'touchmove') {
-        const clientY = e.touches[0].clientY;
-        window.scrollBy(0, this.previousClientY - clientY);
-        this.previousClientY = clientY;
-      }
+      this.props.scrollDir = false;
     },
     
     /**
@@ -118,6 +115,7 @@ export default {
       // If moved more than 2px, cancel click events on children
       if (this.didDrag(this.currentPosition(e))) {
         e.stopPropagation();
+        e.preventDefault();
       }
     },
     

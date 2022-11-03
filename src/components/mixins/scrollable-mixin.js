@@ -27,17 +27,16 @@ export default {
       
       // Calculate the position, and then shift it over to the non-duplicated slides
       const slideOffset = this.getSlideOffset(slideIndex);
+      this.updateOffsetToBeAbsolute();
       
       if (slideOffset === this.currentOffset) {
         return;
       }
-      // Always take the shortest path. Move the current offset to be in the middle if necessary
-      if (Math.abs(this.currentOffset - slideOffset) > this.totalWidth / 2) {
-        if (this.currentOffset <= slideOffset) {
-          this.currentOffset = this.currentOffset + this.totalWidth;
-        } else {
-          this.currentOffset = this.currentOffset - this.totalWidth;
-        }
+      // Move the current offset to so we end on the original slides and scroll in the correct direction
+      if (this.currentOffset <= slideOffset && this.props.scrollDir === 'next') {
+        this.currentOffset = this.currentOffset + this.totalWidth;
+      } else if (this.currentOffset > slideOffset && this.props.scrollDir === 'prev') {
+        this.currentOffset = this.currentOffset - this.totalWidth;
       }
       
       try {
@@ -49,6 +48,7 @@ export default {
       } catch (ignore) {
         // ignore
       }
+      this.props.scrollDir = false;
     },
     
     scroll(from, to, currentTime, duration, resolve) {
@@ -60,7 +60,6 @@ export default {
           vm.scroll(from, to, timestamp, duration, resolve);
         } else {
           vm.currentOffset = to;
-          vm.updateOffsetToBeAbsolute();
           resolve();
         }
       });

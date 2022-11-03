@@ -41,6 +41,22 @@ export default {
     scrollingFunction: {
       type: Function,
       default: easeOutCubic
+    },
+
+    /**
+     * Set to true in order to automatically scroll through the slides. Change to false at any time to pause
+     * @see autoplayInterval
+     */
+    autoplay: {
+      type: Boolean,
+      default: false
+    },
+    /**
+     * The interval, in milliseconds to wait before going to the next slide group
+     */
+    autoplayInterval: {
+      type: Number,
+      default: 5000
     }
   },
   data() {
@@ -48,7 +64,9 @@ export default {
       activeIndex: 0,
       totalSlides: 0,
       currentSlidesPerView: this.slidesPerView,
-      currentScrollIncrement: this.scrollIncrement
+      currentScrollIncrement: this.scrollIncrement,
+      scrollDir: false,
+      autoplayId: -1
     };
   },
   provide() {
@@ -93,6 +111,13 @@ export default {
         this.totalSlides = totalSlides
       }
     });
+    Object.defineProperty(props, 'scrollDir', {
+      enumerable: true,
+      get: () => this.scrollDir,
+      set: (scrollDir) => {
+        this.scrollDir = ['next', 'prev'].includes(scrollDir) ? scrollDir : false;
+      }
+    });
 
     // Read-only
     Object.defineProperty(props, 'infiniteScroll', {
@@ -106,10 +131,6 @@ export default {
     Object.defineProperty(props, 'scrollingFunction', {
       enumerable: true,
       get: () => this.scrollingFunction,
-    });
-    Object.defineProperty(props, 'lastAllowedSlide', {
-      enumerable: true,
-      get: () => this.lastAllowedSlide,
     });
 
     return {props}
@@ -156,9 +177,26 @@ export default {
   watch: {
     activeIndex(activeIndex) {
       this.$emit('change', activeIndex);
+    },
+    autoplay (autoplay) {
+      clearTimeout(this.autoplayId);
+      if (autoplay) {
+        this.startAutoplay();
+      }
+    }
+  },
+  mounted () {
+    if (this.autoplay) {
+      this.startAutoplay();
     }
   },
   methods: {
+    startAutoplay () {
+      this.autoplayId = setTimeout(() => {
+        this.next();
+      }, this.autoplayInterval);
+    },
+
     goToIndex(index) {
       this.requestScrollToSlide(this.getNearestAllowedIndex(index));
     },
@@ -166,15 +204,23 @@ export default {
       this.requestScrollToSlide(this.getNearestAllowedIndex(this.currentScrollIncrement * index));
     },
     next() {
-      this.requestScrollToSlide(this.getNearestAllowedIndex(this.activeIndex + 1, 'next'));
+      this.scrollDir = 'next';
+      this.requestScrollToSlide(this.getNearestAllowedIndex(this.activeIndex + 1));
     },
     prev() {
-      this.requestScrollToSlide(this.getNearestAllowedIndex(this.activeIndex - 1, 'prev'));
+      this.scrollDir = 'prev';
+      this.requestScrollToSlide(this.getNearestAllowedIndex(this.activeIndex - 1));
     },
     setActiveIndex (activeIndex) {
       this.requestScrollToSlide(this.getNearestAllowedIndex(activeIndex));
     },
     requestScrollToSlide (index) {
+      // Reset any existing timer
+      if (this.autoplay) {
+        clearTimeout(this.autoplayId);
+        this.startAutoplay();
+      }
+
       if (this.shouldInfiniteScroll) {
         this.activeIndex = index < 0 ? index + this.totalSlides : index % this.totalSlides;
       } else {
@@ -184,28 +230,18 @@ export default {
     /**
      * Takes the scrollIncrement into account and rounds to the nearest allowed slide
      */
-    getNearestAllowedIndex (index, dir = 'auto') {
+    getNearestAllowedIndex (index) {
       if (this.singleScroll) {
         return index;
       }
-      if (dir === 'auto') {
-        dir = index > this.activeIndex ? 'next' : 'prev';
-      }
+      const dir = this.scrollDir || (index > this.activeIndex ? 'next' : 'prev');
       const round = dir === 'next' ? 'ceil' : 'floor';
       // Round to multiple of currentScrollIncrement
-      const allowedIndex = Math[round](index / this.currentScrollIncrement ) * this.currentScrollIncrement;
-      if (!this.shouldInfiniteScroll) {
-        return allowedIndex;
-      }
-      if (allowedIndex < 0) {
-        // If it's negative, run this again with the max slide num, rounding down
-        return this.getNearestAllowedIndex(this.totalSlides - 1, 'prev');
-      }
-      if (allowedIndex > this.totalSlides - 1) {
-        return 0;
-      }
-      return allowedIndex;
+      return Math[round](index / this.currentScrollIncrement ) * this.currentScrollIncrement;
     }
+  },
+  beforeDestroy () {
+    clearTimeout(this.autoplayId);
   },
   render() {
     return this.$scopedSlots.default({

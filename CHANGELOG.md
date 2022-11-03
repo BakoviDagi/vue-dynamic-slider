@@ -1,5 +1,9 @@
 # vue-dynamic-slider
 
+##### 0.5.0
+  - Add autoplay functionality
+  - Keep track of user scroll direction to always scroll the right way
+
 ##### 0.4.0
   - `ISSUE#5`: Fix scrolling behaviour to be smooth when moving at the beginning and end
 
