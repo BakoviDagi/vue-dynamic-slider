@@ -11,7 +11,8 @@ export default {
       previousClientY: 0,
       startClientX: 0,
       velocity: 0,
-      previousTime: Date.now()
+      previousTime: Date.now(),
+      dragging: false
     };
   },
   mounted () {
@@ -52,6 +53,7 @@ export default {
     dragStart(e) {
       // Cancel any previous scrolling
       cancelAnimationFrame(this.animationId || -1);
+      this.dragging = true;
       
       if (e.type === 'touchstart') {
         this.previousClientX = e.touches[0].clientX;

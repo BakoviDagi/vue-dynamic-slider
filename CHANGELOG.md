@@ -1,5 +1,9 @@
 # vue-dynamic-slider
 
+##### 0.5.1
+  - Fix bug when scolling by pages in infinite scroll
+  - Use a new throttle function
+
 ##### 0.5.0
   - Add autoplay functionality
   - Keep track of user scroll direction to always scroll the right way

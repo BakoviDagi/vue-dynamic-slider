@@ -237,7 +237,8 @@ export default {
       const dir = this.scrollDir || (index > this.activeIndex ? 'next' : 'prev');
       const round = dir === 'next' ? 'ceil' : 'floor';
       // Round to multiple of currentScrollIncrement
-      return Math[round](index / this.currentScrollIncrement ) * this.currentScrollIncrement;
+      const allowedIndex = Math[round](index / this.currentScrollIncrement) * this.currentScrollIncrement;
+      return this.shouldInfiniteScroll && allowedIndex >= this.totalSlides ? 0 : allowedIndex;
     }
   },
   beforeDestroy () {
