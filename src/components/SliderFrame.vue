@@ -2,6 +2,7 @@
 import "../scss/vue-dynamic-slider.scss";
 import {keepInRange} from './utils/range-util';
 import {easeOutCubic} from './utils/scroll';
+import { h } from 'vue';
 
 export default {
   props: {
@@ -245,7 +246,7 @@ export default {
     clearTimeout(this.autoplayId);
   },
   render() {
-    return this.$scopedSlots.default({
+    return h('div', this.$slots.default({
       // Data
       /** The current slide */
       activeIndex: this.activeIndex,
@@ -270,7 +271,7 @@ export default {
       next: this.next,
       /** Function to scroll to the previous slide */
       prev: this.prev
-    });
+    }));
   },
 };
 </script>

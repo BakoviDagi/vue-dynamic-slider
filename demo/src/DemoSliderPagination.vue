@@ -1,5 +1,6 @@
 <template>
   <slider-frame
+    v-slot="{ next, prev, scrollToSlide, activeIndex, canScrollNext, canScrollPrev }"
     :slides-per-view="5"
     :scroll-increment="3"
     :infinite-scroll="true"
@@ -10,7 +11,7 @@
       xl: { slidesPerView: 4 }
     }"
   >
-    <div class="slider d-inline-flex" slot-scope="{ next, prev, scrollToSlide, activeIndex, canScrollNext, canScrollPrev }">
+    <div class="slider d-inline-flex">
       <button
         class="mr-2 my-auto button"
         :disabled="!canScrollPrev"
@@ -49,17 +50,8 @@
 </template>
 
 <script>
-import SliderFrame from '../components/SliderFrame';
-import SliderSlide from '../components/SliderSlide.vue';
-import SliderSlides from '../components/SliderSlides.vue';
-
 export default {
   name: 'DemoSliderPagination',
-  components: {
-    SliderFrame,
-    SliderSlide,
-    SliderSlides,
-  },
   data() {
     return {
       infiniteScroll: false,

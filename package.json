@@ -4,14 +4,19 @@
   "description": "A light-weight slider for Vue",
   "author": "BakoviDagi",
   "scripts": {
-    "serve": "vue-cli-service serve src/demo/index.js",
-    "build": "vue-cli-service build src/index.js",
-    "lint": "vue-cli-service lint src/index.js",
-    "build:library": "npm run package",
-    "package": "vue-cli-service build --mode package --target lib --name vue-dynamic-slider src/index.js",
-    "package:demo": "cross-env NODE_ENV=demo vue-cli-service build --mode package --target app --name vue-dynamic-slider-demo src/demo/index.js"
+    "dev": "vite serve demo",
+    "build": "vite build",
+    "lint": "vue-cli-service lint src/index.js"
   },
-  "main": "./dist/vue-dynamic-slider.umd.min.js",
+  "type": "module",
+  "main": "./dist/vue-dynamic-slider.umd.cjs",
+  "module": "./dist/vue-dynamic-slider.js",
+  "exports": {
+    ".": {
+      "import": "./dist/vue-dynamic-slider.js",
+      "require": "./dist/vue-dynamic-slider.umd.cjs"
+    }
+  },
   "files": [
     "dist/*",
     "src/*",
@@ -19,22 +24,16 @@
     "!dist/demo.html"
   ],
   "peerDependencies": {
-    "core-js": "^3.4.3",
-    "vue": "^2.6.11"
+    "vue": "^3.2.41"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.1.0",
-    "@vue/cli-plugin-eslint": "^4.1.0",
-    "@vue/cli-service": "^4.1.0",
-    "babel-eslint": "^10.0.3",
-    "core-js": "^3.4.3",
+    "@vitejs/plugin-vue": "^3.2.0",
     "cross-env": "^7.0.3",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
+    "eslint": "^8.26.0",
+    "eslint-plugin-vue": "^8.7.1",
     "sass": "^1.55.0",
-    "sass-loader": "^10.0.2",
-    "vue": "^2.6.11",
-    "vue-template-compiler": "^2.6.11"
+    "vue": "^3.2.41",
+    "vite": "^3.2.0"
   },
   "bugs": {
     "url": "https://github.com/BakoviDagi/vue-dynamic-slider/issues"
@@ -56,16 +55,13 @@
   "eslintConfig": {
     "root": true,
     "env": {
-      "node": true
+      "es2021": true
     },
     "extends": [
       "plugin:vue/essential",
       "eslint:recommended"
     ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
+    "rules": {}
   },
   "browserslist": [
     "> 1%",

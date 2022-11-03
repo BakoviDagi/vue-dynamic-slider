@@ -1,9 +1,10 @@
 <template>
   <div>
     <slider-frame
+      v-slot="{ activeIndex }"
       :slides-per-view="slidesPerView"
     >
-      <div class="slider" slot-scope="{ activeIndex }">
+      <div class="slider">
         <slider-slides>
           <slider-slide
             :key="ix"
@@ -50,17 +51,8 @@
 </template>
 
 <script>
-import SliderFrame from '../components/SliderFrame';
-import SliderSlide from '../components/SliderSlide.vue';
-import SliderSlides from '../components/SliderSlides.vue';
-
 export default {
   name: 'DemoBasicSlider',
-  components: {
-    SliderFrame,
-    SliderSlide,
-    SliderSlides,
-  },
   data() {
     return {
       numSlides: 7,

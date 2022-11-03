@@ -1,10 +1,17 @@
 // https://stackoverflow.com/a/51066092
 export function deepClone(vnodes, createElement, id) {
     function cloneVNode(vnode) {
-        const clonedChildren = vnode.children && vnode
-            .children
+        let children = [];
+        if (vnode.children) {
+            if (vnode.children.default) {
+                children = [...vnode.children.default()];
+            } else if (vnode.children.length) {
+                children = [...vnode.children];
+            }
+        }
+        const clonedChildren = children
             .map(vnode => cloneVNode(vnode));
-        const cloned = createElement(vnode.tag, vnode.data, clonedChildren);
+        const cloned = createElement(vnode.tag, vnode.props, clonedChildren);
         cloned.text = vnode.text;
         cloned.isComment = vnode.isComment;
         cloned.componentOptions = vnode.componentOptions;

@@ -3,6 +3,7 @@ import {deepClone} from './utils/vue-util';
 import ScrollableMixin from './mixins/scrollable-mixin';
 import DraggableMixin from './mixins/draggable-mixin';
 import BreakpointMixin from './mixins/breakpoint-mixin';
+import { h } from 'vue';
 
 export default {
   name: 'SliderSlides',
@@ -46,21 +47,21 @@ export default {
       return 0;
     },
   },
-  render(createElement) {
-    const slides = [this.$slots.default];
-    this.props.totalSlides = this.$slots.default.length;
+  render() {
+    const slides = [...this.$slots.default()[0].children];
+    this.props.totalSlides = slides.length;
 
     // Duplicate slides for infinite sliding, but only if there's more slides than in view
-    if(this.props.infiniteScroll) {
-      slides.unshift(...deepClone(this.$slots.default, createElement, 'prevDup'));
-      slides.push(...deepClone(this.$slots.default, createElement, 'nextDup'));
-    }
-    return createElement('div', { class: 'dynamic-slider' /* TODO padding breaks this */ }, [
-      createElement('div', {
+    // if(this.props.infiniteScroll) {
+    //   slides.unshift(...deepClone(this.$slots.default, h, 'prevDup'));
+    //   slides.push(...deepClone(this.$slots.default, h, 'nextDup'));
+    // }
+    return h('div', { class: 'dynamic-slider' /* TODO padding breaks this */ }, [
+      h('div', {
             class: ['dynamic-slider-slides', this.classes],
             style: `left: ${this.currentOffset}px`,
-            // Add a "capture" click listener https://vuejs.org/v2/guide/render-function.html#Event-amp-Key-Modifiers
-            on: { '!click': this.cancelClicks }
+            // Add a "capture" click listener https://vuejs.org/guide/extras/render-function.html#v-on
+            onClickCapture: this.cancelClicks
           },
           slides),
     ]);
