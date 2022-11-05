@@ -97,6 +97,9 @@
         &lt;/slider-frame>
       </code></pre>
       <demo-slider-pagination />
+
+      <h2>Full Demo</h2>
+      <demo-full-example />
     </section>
   </div>
 </template>
@@ -105,10 +108,12 @@
   import DemoBasicSlider from './DemoBasicSlider';
   import DemoBasicInfiniteSlider from './DemoBasicInfiniteSlider';
   import DemoSliderPagination from './DemoSliderPagination';
+  import DemoFullExample from './DemoFullExample.vue';
 
   export default {
     name: 'Demo',
     components: {
+      DemoFullExample,
       DemoSliderPagination,
       DemoBasicInfiniteSlider,
       DemoBasicSlider
