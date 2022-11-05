@@ -41,7 +41,7 @@ export default {
      * but since there's duplicate slides, that should really be -800 offset (5*100)
      */
     slideOffsetModifier () {
-      if (this.props.infiniteScroll) {
+      if (this.props.shouldInfiniteScroll) {
         return -this.totalWidth;
       }
       return 0;
@@ -52,15 +52,13 @@ export default {
     this.props.totalSlides = slides.length;
 
     // Duplicate slides for infinite sliding, but only if there's more slides than in view
-    // if(this.props.infiniteScroll) {
-    //   slides.unshift(...deepClone(this.$slots.default, h, 'prevDup'));
-    //   slides.push(...deepClone(this.$slots.default, h, 'nextDup'));
-    // }
-    return h('div', { class: 'dynamic-slider' /* TODO padding breaks this */ }, [
+    if(this.props.shouldInfiniteScroll) {
+      slides.unshift(...deepClone(slides, h, 'prevDup'));
+      slides.push(...deepClone(slides, h, 'nextDup'));
+    }
+    return h('div', { class: 'dynamic-slider' }, [
       h('div', {
             class: ['dynamic-slider-slides', this.classes],
-            style: `left: ${this.currentOffset}px`,
-            // Add a "capture" click listener https://vuejs.org/guide/extras/render-function.html#v-on
             onClickCapture: this.cancelClicks
           },
           slides),
@@ -74,12 +72,11 @@ export default {
     currentOffset(currentOffset) {
       // Save the scroll percentage so that the current position can be held when resizing
       // Use nextTick so that the resize listener uses the old percentage
-      const offset = this.props.infiniteScroll ? -(currentOffset % this.totalWidth) : -currentOffset;
+      const offset = this.props.shouldInfiniteScroll ? -(currentOffset % this.totalWidth) : -currentOffset;
       this.scrollPercentage = offset / this.totalWidth;
     },
     'props.currentSlidesPerView': function () {
       this.jumpToSlide(this.props.activeIndex);
-      this.props.activeIndex = this.props.activeIndex;
     },
     'props.totalSlides': function () {
       this.jumpToSlide(this.props.activeIndex);
@@ -89,7 +86,6 @@ export default {
     },
     elementWidth () {
       this.jumpToSlide(this.props.activeIndex);
-      this.props.activeIndex = this.props.activeIndex;
     }
   },
   beforeDestroy() {
@@ -111,3 +107,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.dynamic-slider-slides {
+  left: calc(v-bind(currentOffset) * 1px);
+}
+</style>

@@ -43,7 +43,7 @@ export default {
       }
       // Move the slides back to the non-duplicated
       let index = Math[roundType](this.scrollPercentage * this.props.totalSlides);
-      if (!this.props.infiniteScroll) {
+      if (!this.props.shouldInfiniteScroll) {
         index = keepInRange(index, 0, this.props.totalSlides - 1);
       }
       return index;
@@ -78,7 +78,7 @@ export default {
       this.currentOffset -= this.previousClientX - currentPosition;
       this.previousClientX = currentPosition;
       
-      if (this.props.infiniteScroll) {
+      if (this.props.shouldInfiniteScroll) {
         if (this.currentOffset >= 0) {
           this.currentOffset -= this.totalWidth;
         } else if (this.currentOffset <= this.duplicateRightStart) {
@@ -103,7 +103,6 @@ export default {
       // If active index is unchanged, scroll back to start
       if (this.props.activeIndex === originalIndex) {
         // Reverse the direction so it's smoother and scroll to it
-        this.props.scrollDir = this.props.scrollDir === 'next' ? 'prev' : 'next';
         await this.scrollToSlide(this.props.activeIndex);
       }
       this.props.scrollDir = false;

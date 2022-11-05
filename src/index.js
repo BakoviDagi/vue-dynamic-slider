@@ -3,7 +3,7 @@ import SliderSlide from './components/SliderSlide';
 import SliderSlides from './components/SliderSlides';
 
 export default {
-  install (app, config) {
+  install (app) {
     app.component('slider-frame', SliderFrame)
       .component('slider-slides', SliderSlides)
       .component('slider-slide', SliderSlide);

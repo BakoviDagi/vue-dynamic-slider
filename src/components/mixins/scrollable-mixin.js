@@ -33,7 +33,7 @@ export default {
       if (slideOffset === this.currentOffset) {
         return;
       }
-      if (this.dragging && !this.props.infiniteScroll) {
+      if (this.dragging && !this.props.shouldInfiniteScroll) {
         // If we're done dragging, set the direction so we take the shortest route possible
         this.dragging = false;
         this.props.scrollDir = this.currentOffset > slideOffset ? 'next' : 'prev';

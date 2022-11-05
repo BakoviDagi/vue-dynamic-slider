@@ -1,17 +1,13 @@
-// https://stackoverflow.com/a/51066092
+/**
+ * Deep clone a Vue node
+ * @param vnodes
+ * @param createElement
+ * @param id
+ * @returns {*}
+ */
 export function deepClone(vnodes, createElement, id) {
     function cloneVNode(vnode) {
-        let children = [];
-        if (vnode.children) {
-            if (vnode.children.default) {
-                children = [...vnode.children.default()];
-            } else if (vnode.children.length) {
-                children = [...vnode.children];
-            }
-        }
-        const clonedChildren = children
-            .map(vnode => cloneVNode(vnode));
-        const cloned = createElement(vnode.tag, vnode.props, clonedChildren);
+        const cloned = createElement(vnode.type, vnode.props, vnode.children.default);
         cloned.text = vnode.text;
         cloned.isComment = vnode.isComment;
         cloned.componentOptions = vnode.componentOptions;
@@ -20,19 +16,6 @@ export function deepClone(vnodes, createElement, id) {
         cloned.ns = vnode.ns;
         cloned.isStatic = vnode.isStatic;
 
-        //TODO this kinda works but is horrible broken...
-        // if (!descendant) {
-        //     cloned.data.staticClass = vnode.data.staticClass || '';
-        //     cloned.data.staticClass = cloned.data.staticClass.toString();
-        //     cloned.data.staticClass+= ' clone'
-        // }
-
-        // cloned.data = vnode.data;
-        // cloned.child = vnode.child;
-        //eslint-disable-next-line
-        // console.log(vnode.$child._uid);
-        //eslint-disable-next-line
-        // console.log('cloning', vnode, cloned);
         if (vnode.key !== null && vnode.key !== undefined && vnode.key !== '') {
             cloned.key = `${vnode.key}-${id}`;
         }

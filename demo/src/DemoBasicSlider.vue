@@ -3,23 +3,22 @@
     <slider-frame
       v-slot="{ activeIndex }"
       :slides-per-view="slidesPerView"
+      class="slider"
     >
-      <div class="slider">
-        <slider-slides>
-          <slider-slide
-            :key="ix"
-            v-for="ix in numSlides"
+      <slider-slides>
+        <slider-slide
+          :key="ix"
+          v-for="ix in numSlides"
+        >
+          <img
+            :src="`https://via.placeholder.com/300x300.png?text=${ix}`"
+            :alt="`Image ${ix}`"
+            class="w-100 px-1"
           >
-            <img
-              :src="`https://via.placeholder.com/300x300.png?text=${ix}`"
-              :alt="`Image ${ix}`"
-              class="w-100 px-1"
-            >
-          </slider-slide>
-        </slider-slides>
-        <div class="font-weight-bold">
-          Active slide: {{ activeIndex + 1 }}
-        </div>
+        </slider-slide>
+      </slider-slides>
+      <div class="font-weight-bold">
+        Active slide: {{ activeIndex + 1 }}
       </div>
     </slider-frame>
     <div class="py-3">

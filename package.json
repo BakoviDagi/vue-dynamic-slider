@@ -1,12 +1,12 @@
 {
   "name": "vue-dynamic-slider",
-  "version": "0.5.1",
+  "version": "1.0.0",
   "description": "A light-weight slider for Vue",
   "author": "BakoviDagi",
   "scripts": {
     "dev": "vite serve demo",
     "build": "vite build",
-    "lint": "vue-cli-service lint src/index.js"
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore src"
   },
   "type": "module",
   "main": "./dist/vue-dynamic-slider.umd.cjs",

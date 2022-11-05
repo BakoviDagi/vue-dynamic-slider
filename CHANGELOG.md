@@ -1,5 +1,8 @@
 # vue-dynamic-slider
 
+##### 1.0.0
+  - BREAKING: Update Vue version to v3
+
 ##### 0.5.1
   - Fix bug when scolling by pages in infinite scroll
   - Use a new throttle function

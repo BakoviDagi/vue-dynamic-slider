@@ -60,89 +60,52 @@ export default {
       default: 5000
     }
   },
-  data() {
-    return {
-      activeIndex: 0,
-      totalSlides: 0,
-      currentSlidesPerView: this.slidesPerView,
-      currentScrollIncrement: this.scrollIncrement,
-      scrollDir: false,
-      autoplayId: -1
-    };
-  },
-  provide() {
+  data: vm => ({
+    activeIndex: 0,
+    totalSlides: 0,
+    currentSlidesPerView: vm.slidesPerView,
+    currentScrollIncrement: vm.scrollIncrement,
+    scrollDir: false,
+    autoplayId: -1
+  }),
+  provide () {
     const props = {};
-    Object.defineProperty(props, 'slidesPerView', {
-      enumerable: true,
-      get: () => this.slidesPerView,
-      set: (slidesPerView) => {
-        this.slidesPerView = slidesPerView
+    const vm = this;
+    function reactive (name, setter = undefined) {
+      if (setter === true) {
+        setter = (prop) => vm[name] = prop;
       }
+      Object.defineProperty(props, name, {
+        enumerable: true,
+        get: () => vm[name],
+        set: setter
+      });
+    }
+
+    reactive('currentSlidesPerView', (currentSlidesPerView) => {
+      this.currentSlidesPerView = Math.min(currentSlidesPerView, this.totalSlides)
     });
-    Object.defineProperty(props, 'currentSlidesPerView', {
-      enumerable: true,
-      get: () => this.currentSlidesPerView,
-      set: (currentSlidesPerView) => {
-        this.currentSlidesPerView = Math.min(currentSlidesPerView, this.totalSlides)
-      }
-    });
-    Object.defineProperty(props, 'scrollIncrement', {
-      enumerable: true,
-      get: () => this.scrollIncrement,
-      set: (scrollIncrement) => {
-        this.scrollIncrement = scrollIncrement
-      }
-    });
-    Object.defineProperty(props, 'currentScrollIncrement', {
-      enumerable: true,
-      get: () => this.currentScrollIncrement,
-      set: (currentScrollIncrement) => {
-        this.currentScrollIncrement = currentScrollIncrement
-      }
-    });
-    Object.defineProperty(props, 'activeIndex', {
-      enumerable: true,
-      get: () => this.activeIndex,
-      set: this.setActiveIndex
-    });
-    Object.defineProperty(props, 'totalSlides', {
-      enumerable: true,
-      get: () => this.totalSlides,
-      set: (totalSlides) => {
-        this.totalSlides = totalSlides
-      }
-    });
-    Object.defineProperty(props, 'scrollDir', {
-      enumerable: true,
-      get: () => this.scrollDir,
-      set: (scrollDir) => {
-        this.scrollDir = ['next', 'prev'].includes(scrollDir) ? scrollDir : false;
-      }
+    reactive('currentScrollIncrement', true);
+    reactive('activeIndex', this.setActiveIndex);
+    reactive('totalSlides', true);
+    reactive('scrollDir', (scrollDir) => {
+      this.scrollDir = ['next', 'prev'].includes(scrollDir) ? scrollDir : false;
     });
 
     // Read-only
-    Object.defineProperty(props, 'infiniteScroll', {
-      enumerable: true,
-      get: () => this.shouldInfiniteScroll,
-    });
-    Object.defineProperty(props, 'breakpoints', {
-      enumerable: true,
-      get: () => this.breakpoints,
-    });
-    Object.defineProperty(props, 'scrollingFunction', {
-      enumerable: true,
-      get: () => this.scrollingFunction,
-    });
+    reactive('slidesPerView');
+    reactive('scrollIncrement');
+    reactive('shouldInfiniteScroll');
+    reactive('breakpoints');
+    reactive('scrollingFunction');
 
     return {props}
   },
   computed: {
     canScrollNext () {
-      // TODO
       return this.shouldInfiniteScroll || this.activeIndex < this.lastAllowedSlide;
     },
     canScrollPrev () {
-      // TODO
       return this.shouldInfiniteScroll || this.activeIndex > 0;
     },
     shouldInfiniteScroll () {
@@ -154,7 +117,7 @@ export default {
     slidesInView () {
       const slidesInView = [];
       for (let i = this.activeIndex; i < this.activeIndex + this.currentSlidesPerView; i++) {
-        if (this.infiniteScroll) {
+        if (this.shouldInfiniteScroll) {
           slidesInView.push(i >= this.totalSlides ? i - this.totalSlides : i);
         } else if (i < this.totalSlides) {
           slidesInView.push(i);

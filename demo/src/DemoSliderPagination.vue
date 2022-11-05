@@ -10,42 +10,41 @@
       lg: { slidesPerView: 3 },
       xl: { slidesPerView: 4 }
     }"
+    class="slider d-inline-flex"
   >
-    <div class="slider d-inline-flex">
-      <button
-        class="mr-2 my-auto button"
-        :disabled="!canScrollPrev"
-        @click="prev"
+    <button
+      class="mr-2 my-auto button"
+      :disabled="!canScrollPrev"
+      @click="prev"
+    >
+      <i aria-hidden="true" class="fas fa-3x fa-chevron-left"></i>
+      <span class="sr-only">Previous</span>
+    </button>
+    <slider-slides>
+      <slider-slide
+        :key="ix"
+        v-for="(ix, iter) in numSlides"
       >
-        <i aria-hidden="true" class="fas fa-3x fa-chevron-left"></i>
-        <span class="sr-only">Previous</span>
-      </button>
-      <slider-slides>
-        <slider-slide
-          :key="ix"
-          v-for="(ix, iter) in numSlides"
+        <img
+          :src="`https://via.placeholder.com/300x300.png?text=${ix}`"
+          :alt="`Image ${ix}`"
+          :class="{
+                    'active-slide' : activeIndex === iter,
+                    'px-1': activeIndex !== iter
+                  }"
+          class="w-100"
+          @click="scrollToSlide(iter)"
         >
-          <img
-            :src="`https://via.placeholder.com/300x300.png?text=${ix}`"
-            :alt="`Image ${ix}`"
-            :class="{
-                      'active-slide' : activeIndex === iter,
-                      'px-1': activeIndex !== iter
-                    }"
-            class="w-100"
-            @click="scrollToSlide(iter)"
-          >
-        </slider-slide>
-      </slider-slides>
-      <button
-        class="button ml-2 my-auto"
-        :disabled="!canScrollNext"
-        @click="next"
-      >
-        <i aria-hidden="true" class="fas fa-3x fa-chevron-right"></i>
-        <span class="sr-only">Next</span>
-      </button>
-    </div>
+      </slider-slide>
+    </slider-slides>
+    <button
+      class="button ml-2 my-auto"
+      :disabled="!canScrollNext"
+      @click="next"
+    >
+      <i aria-hidden="true" class="fas fa-3x fa-chevron-right"></i>
+      <span class="sr-only">Next</span>
+    </button>
   </slider-frame>
 </template>
 
