@@ -19,6 +19,7 @@
     >
       <i aria-hidden="true" class="fas fa-3x fa-chevron-left"></i>
       <span class="sr-only">Previous</span>
+      {{activeIndex}}
     </button>
     <slider-slides>
       <slider-slide
@@ -29,10 +30,11 @@
           :src="`https://via.placeholder.com/300x300.png?text=${ix}`"
           :alt="`Image ${ix}`"
           :class="{
-                    'active-slide' : activeIndex === iter,
-                    'px-1': activeIndex !== iter
-                  }"
+            'active-slide' : activeIndex === iter,
+            'px-1': activeIndex !== iter
+          }"
           class="w-100"
+          :style="iter % 2 === 0 ? style : undefined"
           @click="scrollToSlide(iter)"
         >
       </slider-slide>
@@ -54,7 +56,8 @@ export default {
   data() {
     return {
       infiniteScroll: false,
-      numSlides: 10
+      numSlides: 10,
+      style: 'color: red;'
     };
   }
 }

@@ -12,8 +12,12 @@
         >
           <img
             :src="`https://via.placeholder.com/300x300.png?text=${ix}`"
+            :class="{
+              'active-slide' : activeIndex === ix,
+              'px-1': activeIndex !== ix
+            }"
             :alt="`Image ${ix}`"
-            class="w-100 px-1"
+            class="w-100"
           >
         </slider-slide>
       </slider-slides>

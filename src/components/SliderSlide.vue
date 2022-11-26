@@ -1,34 +1,27 @@
+<script setup>
+import { inject } from 'vue';
+
+const { slideClass } = defineProps({
+  slideClass: {
+    type: [String, Object, Array],
+    default: 'dynamic-slider-slide'
+  }
+})
+
+const currentSlidesPerView = inject('currentSlidesPerView')
+</script>
+
 <template>
   <div
-    v-show="active"
+    class="dynamic-slider-slide"
     :class="slideClass"
-    :style="{'width': widthPercent}"
   >
     <slot/>
   </div>
 </template>
 
-<script>
-  export default {
-    name: 'SliderSlide',
-    props: {
-      slideClass: {
-        type: [String, Object, Array],
-        default: 'dynamic-slider-slide'
-      }
-    },
-    data() {
-      return {
-        active: true
-      };
-    },
-    inject: [
-      'props'
-    ],
-    computed: {
-      widthPercent() {
-        return (100 / this.props.currentSlidesPerView) + '%'
-      }
-    }
-  };
-</script>
+<style>
+.dynamic-slider-slide {
+  width: calc(1 / v-bind('currentSlidesPerView') * 100%);
+}
+</style>

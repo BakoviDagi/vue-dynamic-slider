@@ -1,10 +1,11 @@
 <script setup>
-import "../scss/vue-dynamic-slider.scss";
+import '../scss/vue-dynamic-slider.scss';
 import { ref, computed, watch, useSlots, h } from 'vue';
 import { useAutoplay } from './autoplay.js';
 import { easeOutCubic } from './utils/scroll.js';
 import { keepInRange } from './utils/range-util.js';
 import { useProvide } from './provide.js';
+import {useBreakpoint} from './breakpoint.js';
 
 const props = defineProps({
   /**
@@ -63,12 +64,13 @@ const props = defineProps({
 });
 const emit = defineEmits(['change']);
 
-// Data
 const scrollDir = ref(null);
-const activeIndex = ref(0);
 const totalSlides = ref(0);
-const currentSlidesPerView = ref(props.slidesPerView);
-const currentScrollIncrement = ref(props.scrollIncrement);
+
+const {
+  currentSlidesPerView,
+  currentScrollIncrement
+} = useBreakpoint(props, totalSlides);
 
 // Computed
 const numPages = computed(() => Math.ceil(totalSlides.value / currentScrollIncrement.value));
@@ -79,9 +81,45 @@ const lastAllowedSlide = computed(() => {
   }
   return Math.max(totalSlides.value - currentSlidesPerView.value, 0);
 });
+
+function getNearestAllowedIndex (index) {
+  if (currentScrollIncrement.value === 1) {
+    return index;
+  }
+  const dir = scrollDir.value || (index > activeIndex.value ? 'next' : 'prev');
+  const round = dir === 'next' ? 'ceil' : 'floor';
+  // Round to multiple of currentScrollIncrement
+  const allowedIndex = Math[round](index / currentScrollIncrement.value) * currentScrollIncrement.value;
+  return shouldInfiniteScroll.value && allowedIndex >= totalSlides.value ? 0 : allowedIndex;
+}
+
+const activeIndexValue = ref(0);
+const activeIndex = computed({
+  get: () => activeIndexValue.value,
+  set: ix => {
+    const nearest = getNearestAllowedIndex(ix);
+    if (shouldInfiniteScroll.value) {
+      activeIndexValue.value = nearest < 0 ? nearest + totalSlides.value : nearest % totalSlides.value;
+    } else {
+      activeIndexValue.value = keepInRange(nearest, 0, lastAllowedSlide.value);
+    }
+  }
+})
+
+watch(activeIndex, val => emit('change', val));
+
+function next () {
+  scrollDir.value = 'next';
+  activeIndex.value = activeIndex.value + 1;
+}
+
+useProvide(currentSlidesPerView, activeIndex, totalSlides, scrollDir, shouldInfiniteScroll, props);
+
+useAutoplay(props, scrollDir, activeIndex, next);
+
+// Exposed
 const canScrollNext = computed(() => shouldInfiniteScroll.value || activeIndex.value < lastAllowedSlide.value);
 const canScrollPrev = computed(() => shouldInfiniteScroll.value || activeIndex.value > 0);
-const singleScroll = computed(() => currentScrollIncrement.value === 1);
 const slidesInView = computed(() => {
   const slidesInView = [];
   for (let i = activeIndex.value; i < activeIndex.value + currentSlidesPerView.value; i++) {
@@ -94,52 +132,16 @@ const slidesInView = computed(() => {
   return slidesInView;
 });
 const currentPage = computed(() => Math.floor(activeIndex.value / totalSlides.value * numPages.value));
-
-watch(activeIndex, val => emit('change', val));
-
-// Methods
 function goToIndex(index) {
-  requestScrollToSlide(getNearestAllowedIndex(index));
+  activeIndex.value = index;
 }
 function goToPage (index) {
-  requestScrollToSlide(getNearestAllowedIndex(currentScrollIncrement.value * index));
+  activeIndex.value = currentScrollIncrement.value * index;
 }
 function prev() {
   scrollDir.value = 'prev';
-  requestScrollToSlide(getNearestAllowedIndex(activeIndex.value - 1));
+  activeIndex.value = activeIndex.value - 1;
 }
-function setActiveIndex (activeIndex) {
-  requestScrollToSlide(getNearestAllowedIndex(activeIndex));
-}
-function requestScrollToSlide (index) {
-  if (shouldInfiniteScroll.value) {
-    activeIndex.value = index < 0 ? index + totalSlides.value : index % totalSlides.value;
-  } else {
-    activeIndex.value = keepInRange(index, 0, lastAllowedSlide.value);
-  }
-}
-/**
- * Takes the scrollIncrement into account and rounds to the nearest allowed slide
- */
-function getNearestAllowedIndex (index) {
-  if (singleScroll.value) {
-    return index;
-  }
-  const dir = scrollDir.value || (index > activeIndex.value ? 'next' : 'prev');
-  const round = dir === 'next' ? 'ceil' : 'floor';
-  // Round to multiple of currentScrollIncrement
-  const allowedIndex = Math[round](index / currentScrollIncrement.value) * currentScrollIncrement.value;
-  return shouldInfiniteScroll.value && allowedIndex >= totalSlides.value ? 0 : allowedIndex;
-}
-function next () {
-  scrollDir.value = 'next';
-  requestScrollToSlide(getNearestAllowedIndex(activeIndex.value + 1));
-}
-
-useProvide (currentSlidesPerView, currentScrollIncrement, activeIndex, totalSlides, scrollDir, props.slidesPerView,
-    props.scrollIncrement, shouldInfiniteScroll, props.breakpoints, props.scrollingFunction, setActiveIndex)
-
-useAutoplay(props, scrollDir, activeIndex, next);
 
 const slots = useSlots();
 const root = () => h('div', slots.default({
