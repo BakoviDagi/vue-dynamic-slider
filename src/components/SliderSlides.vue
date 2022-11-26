@@ -72,26 +72,31 @@ function jumpWatcher () {
 watch(currentSlidesPerView, jumpWatcher);
 watch(totalSlides, jumpWatcher);
 watch(elementWidth, jumpWatcher);
-
 const slots = useSlots();
-const slides = slots.default()[0].children;
-totalSlides.value = slides.length;
 
-// Duplicate slides for infinite sliding, but only if there's more slides than in view
-if(shouldInfiniteScroll.value) {
-  const prev = deepCloneComponent(slides, 'prevDup');
-  const next = deepCloneComponent(slides, 'nextDup');
-  slides.unshift(...prev);
-  slides.push(...next);
+const root = () => {
+  const slides = slots.default()[0].children;
+  totalSlides.value = slides.length;
+
+  activeIndex.value; // Make this rerun on active index change
+
+  // Duplicate slides for infinite sliding, but only if there's more slides than in view
+  if(shouldInfiniteScroll.value) {
+    const prev = deepCloneComponent(slides, 'prevDup');
+    const next = deepCloneComponent(slides, 'nextDup');
+    slides.unshift(...prev);
+    slides.push(...next);
+  }
+
+  return h('div', { class: 'dynamic-slider' }, [
+    h('div', {
+        class: ['dynamic-slider-slides', props.classes],
+        onClickCapture: cancelClicks
+      },
+      slides
+    ),
+  ]);
 }
-const root = h('div', { class: 'dynamic-slider' }, [
-  h('div', {
-      class: ['dynamic-slider-slides', props.classes],
-      onClickCapture: cancelClicks
-    },
-    slides
-  ),
-]);
 </script>
 
 <template>
