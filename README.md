@@ -54,6 +54,9 @@ Props:
 - `scrollIncrement`: The number of slides to scroll by at a time. If set, creates pages. Default: `1`
 - `infiniteScroll`: True to enable infinite scrolling. Duplicate slides are created. Default: `false`
 - `breakpoints`: Object of screen width to override props. Can adjust `slidesPerView` and `scrollIncrement` based on screen width. See below for more info.
+- `breakpointElement`: Function that returns the element to get breakpoint width from. Defaults to window if null.
+  Use this if you have the slider in an element that isn't the full screen width and want the breakpoints to
+  react to that element instead of the window
 - `scrollingFunction`: Custom function for scrolling slides. Defaults to a cubic function
 - `autoplay`: Boolean that automatically scrolls through the slides when `true`. Toggle this to start/stop the autoplay
 - `autoplayInterval`: Number of milliseconds to wait before autoplaying

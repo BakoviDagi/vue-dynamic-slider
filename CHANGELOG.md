@@ -1,5 +1,8 @@
 # vue-dynamic-slider
 
+##### 0.6.0
+  - `ISSUE#8`: Add `breakpointElement` prop that allows for breakpoints to be reactive to something other than the window
+
 ##### 0.5.1
   - Fix bug when scolling by pages in infinite scroll
   - Use a new throttle function

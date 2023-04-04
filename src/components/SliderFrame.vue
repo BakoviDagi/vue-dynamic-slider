@@ -35,6 +35,13 @@ export default {
       default: null
     },
     /**
+     * Function to get the element to watch width and break off of. If null, use window width
+     */
+    breakpointElement: {
+      type: Function,
+      default: null
+    },
+    /**
      * Override for the scrolling function.
      * @see easeOutCubic
      */
@@ -127,6 +134,10 @@ export default {
     Object.defineProperty(props, 'breakpoints', {
       enumerable: true,
       get: () => this.breakpoints,
+    });
+    Object.defineProperty(props, 'breakpointElement', {
+      enumerable: true,
+      get: () => this.breakpointElement,
     });
     Object.defineProperty(props, 'scrollingFunction', {
       enumerable: true,
