@@ -1,9 +1,10 @@
 <script setup>
 import { computed, h, inject, ref, useSlots, watch } from 'vue';
 import { deepCloneComponent } from './utils/vue-util.js';
-import { useResizeObserver } from './resize-observer.js';
-import { useScrollable } from './scrollable.js';
-import { useDraggable } from './draggable.js';
+import { useResizeObserver } from './composables/resize-observer.js';
+import { useScrollable } from './composables/scrollable.js';
+import { useDraggable } from './composables/draggable.js';
+import { useTeleport } from './composables/teleport.js';
 
 const props = defineProps({
   classes: {
@@ -33,15 +34,15 @@ const totalWidth = computed(() => {
  * but since there's duplicate slides, that should really be -800 offset (5*100)
  */
 const slideOffsetModifier = computed(() => {
-  if (shouldInfiniteScroll.value) {
-    return -totalWidth.value;
-  }
+  // if (shouldInfiniteScroll.value) {
+  //   return -totalWidth.value;
+  // }
   return 0;
 });
 
 
 function updateOffsetToBeAbsolute () {
-  currentOffset.value = -scrollPercentage.value * totalWidth.value + slideOffsetModifier.value;
+  // currentOffset.value = -scrollPercentage.value * totalWidth.value + slideOffsetModifier.value;
 }
 const {
   currentOffset,
@@ -74,18 +75,21 @@ watch(totalSlides, jumpWatcher);
 watch(elementWidth, jumpWatcher);
 const slots = useSlots();
 
+const { slideOrder } = useTeleport(currentOffset, elementWidth);
+
 const root = () => {
-  const slides = slots.default()[0].children;
+  let slides = slots.default()[0].children;
   totalSlides.value = slides.length;
 
   activeIndex.value; // Make this rerun on active index change
 
   // Duplicate slides for infinite sliding, but only if there's more slides than in view
   if(shouldInfiniteScroll.value) {
-    const prev = deepCloneComponent(slides, 'prevDup');
-    const next = deepCloneComponent(slides, 'nextDup');
-    slides.unshift(...prev);
-    slides.push(...next);
+    slides = slideOrder.value.map(o => slides[o]);
+    // const prev = deepCloneComponent(slides, 'prevDup');
+    // const next = deepCloneComponent(slides, 'nextDup');
+    // slides.unshift(...prev);
+    // slides.push(...next);
   }
 
   return h('div', { class: 'dynamic-slider' }, [

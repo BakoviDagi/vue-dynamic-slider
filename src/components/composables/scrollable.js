@@ -10,6 +10,8 @@ export function useScrollable (totalWidth, slideWidth, slideOffsetModifier, upda
   const scrollDir = inject('scrollDir');
   const scrollingFunction = inject('scrollingFunction');
 
+  // const currentOffset = shouldInfiniteScroll.value ? ref(slideWidth.value) : ref(0);
+
   let promiseResolve = null;
   let animationId = -1;
 

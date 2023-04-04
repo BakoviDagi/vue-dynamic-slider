@@ -1,11 +1,11 @@
 <script setup>
 import '../scss/vue-dynamic-slider.scss';
 import { ref, computed, watch, useSlots, h } from 'vue';
-import { useAutoplay } from './autoplay.js';
+import { useAutoplay } from './composables/autoplay.js';
 import { easeOutCubic } from './utils/scroll.js';
 import { keepInRange } from './utils/range-util.js';
-import { useProvide } from './provide.js';
-import {useBreakpoint} from './breakpoint.js';
+import { useProvide } from './composables/provide.js';
+import {useBreakpoint} from './composables/breakpoint.js';
 
 const props = defineProps({
   /**

@@ -1,4 +1,4 @@
-import { keepInRange } from './utils/range-util';
+import { keepInRange } from '../utils/range-util';
 import { inject, nextTick, onBeforeUnmount, onMounted } from 'vue';
 
 const VELOCITY_THRESHOLD = .1;

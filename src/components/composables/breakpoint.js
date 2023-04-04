@@ -1,5 +1,5 @@
 import {ref, computed, onMounted, onBeforeUnmount} from 'vue';
-import {throttle} from './utils/throttle.js';
+import {throttle} from '../utils/throttle.js';
 
 const SIZES = {
   sm: 640,
